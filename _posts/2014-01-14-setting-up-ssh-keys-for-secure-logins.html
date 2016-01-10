@@ -26,10 +26,10 @@ cat /path/to/public.key &gt;&gt; .ssh/authorized_keys</pre>
 <h3> Installing private key on the local machine</h3>
 <p>We're almost done. We just need to install the private key on to the local machine that we are connecting from. In my particular case, I am using Windows 7 and PuTTY to connect.</p>
 <p>The first thing that we need to do is use <a href="http://the.earth.li/~sgtatham/putty/latest/x86/puttygen.exe">PuTTY</a> to concert our private key into a format that PuTTY accepts.</p>
-<p><a href="https://robert.sh/uploads/2014/01/PuTTYGen1.png"><img class="alignnone size-full wp-image-103" alt="PuTTYGen1" src="https://robert.sh/uploads/2014/01/PuTTYGen1.png" width="657" height="590" /></a></p>
+<p><a href="/uploads/2014/01/PuTTYGen1.png"><img class="alignnone size-full wp-image-103" alt="PuTTYGen1" src="/uploads/2014/01/PuTTYGen1.png" width="657" height="590" /></a></p>
 <p>Click 'Load', then select then choose the private key that you generated earlier (you'll need to download it from the remote server first). Enter your passphrase when prompted. Then, click 'Save private key'. You should now have a file with an extension of .ppk.</p>
 <p>Now, we just simply load this .ppk file into PuTTY:</p>
-<p><a href="https://robert.sh/uploads/2014/01/PuTTY1.png"><img class="alignnone size-full wp-image-104" alt="PuTTY1" src="https://robert.sh/uploads/2014/01/PuTTY1.png" width="618" height="554" /></a></p>
+<p><a href="/uploads/2014/01/PuTTY1.png"><img class="alignnone size-full wp-image-104" alt="PuTTY1" src="/uploads/2014/01/PuTTY1.png" width="618" height="554" /></a></p>
 <p>Click 'Browse...' and then choose the .ppk file that you saved earlier.</p>
 <p>And that's it! Now you can connect to the remote machine using PuTTY with key based authentication.</p>
 <p>&nbsp;</p>

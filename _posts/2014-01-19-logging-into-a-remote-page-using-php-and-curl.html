@@ -41,7 +41,7 @@ comments: true
 <p>That's cool. But how do I login to a page, twitter.com for example?</p>
 <h1>Logging into a remote page</h1>
 <p>The goal is to login to twitter.com using cURL. Every time that I submit a form, an HTTP POST operation occurs which contains data such as my username and password and sends it to the server. To find out the specifics, I am using the network inspection plugin provided by my web browser.</p>
-<p><a href="https://robert.sh/uploads/2014/01/twitterPOST.png"><img class="alignnone size-full wp-image-115" alt="twitterPOST" src="https://robert.sh/uploads/2014/01/twitterPOST.png" width="622" height="503" /></a></p>
+<p><a href="/uploads/2014/01/twitterPOST.png"><img class="alignnone size-full wp-image-115" alt="twitterPOST" src="/uploads/2014/01/twitterPOST.png" width="622" height="503" /></a></p>
 <p>With the inspection tool enabled, I ended up with the above after submitting the login form. The line that I will be using is:</p>
 <pre class="lang:default highlight:0 decode:true">session%5Busername_or_email%5D={USERNAME}&amp;session%5Bpassword%5D={PASSWORD}&amp;authenticity_token=13dbbfcb8648904d6e4cb047022f53071ea86ad2&amp;scribe_log=&amp;redirect_after_login=&amp;authenticity_token=13dbbfcb8648904d6e4cb047022f53071ea86ad2&amp;remember_me=1</pre>
 <p>Now that I have obtained that, I will use cURL to login to Twitter. Note that I replaced my username and password with <code>{USERNAME}</code> and <code>{PASSWORD}</code> for security purposes of course.</p>
