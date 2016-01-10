@@ -1,0 +1,44 @@
+---
+layout: post
+status: publish
+published: false
+title: Running multiple versions of jQuery on the same page
+author:
+  display_name: Bobby Shannon
+  login: bobby
+  email: rshannon@buffalo.edu
+  url: ''
+author_login: bobby
+author_email: rshannon@buffalo.edu
+wordpress_id: 124
+wordpress_url: http://bobbyshannon.com/?p=124
+date: '2014-01-22 03:01:12 -0500'
+date_gmt: '2014-01-22 03:01:12 -0500'
+categories:
+- Web Development
+- Blog
+tags: []
+comments: []
+---
+<p>Sometimes it may be necessary to run more than one version of jQuery due to compatibility issues. Fortunately, this is a very easy thing to do.</p>
+<p>One just needs to include the jQuery libraries like so:</p>
+<pre class="lang:xhtml decode:true">&lt;script src="http://code.jquery.com/jquery-1.8.0.min.js"&gt;&lt;/script&gt;
+&lt;script&gt; var $old = jQuery.noConflict();&lt;/script&gt;
+&lt;!--INCLUDE &amp; INITIALIZE PLUGINS THAT USE JQUERY 1.8 HERE--&gt;
+
+&lt;script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;!--INCLUDE &amp; INITIALIZE PLUGINS THAT USE LATEST VERSION OF JQUERY HERE--&gt;</pre>
+<p>By default, we reference jQuery with the variable name <code>$</code>. By using <a href="http://api.jquery.com/jquery.noconflict/">noConflict()</a>, we can assign jQuery to any variable name that we'd like. In this case we use <code>$old</code> to reference jQuery 1.8, and the default <code>$</code> to reference the latest version of jQuery.</p>
+<p>For example, if we want to initialize a particular plugin using the latest version of jQuery, the code would look something like this:</p>
+<pre class="lang:xhtml decode:true">&lt;script type="text/javascript"&gt;
+$(document).ready(function() {
+    $('.selector').somePlugin();
+});	
+&lt;/script&gt;</pre>
+<p>If we wanted to initialize this same plugin using the jQuery 1.8, we'd replace $ with $old:</p>
+<pre class="lang:xhtml decode:true">&lt;script type="text/javascript"&gt;
+$old(document).ready(function() {
+    $old('.selector').somePlugin();
+});	
+&lt;/script&gt;</pre>
+<p>And that's all there is to it. Of course, it is always recommended to try and run only one version of jQuery for simplicity and faster page load times. Not to mention running two versions of jQuery on a web page is well, ugly.</p>

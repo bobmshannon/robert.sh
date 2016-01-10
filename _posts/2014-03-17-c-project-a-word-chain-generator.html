@@ -1,0 +1,77 @@
+---
+layout: post
+status: publish
+published: true
+title: 'C++ Project: A Word Chain Generator'
+date: '2014-03-17 23:09:39 -0400'
+date_gmt: '2014-03-17 23:09:39 -0400'
+categories:
+- Programming
+- Blog
+- Projects
+tags: []
+comments: []
+---
+<p>I was recently tasked with writing a program that takes an input file consisting of words, process it, and then output all word chains present in the file. For this particular task, a word chain was defined as a sequence of words in which adjacent pairs have an edit distance of 1. For example, the following would be considered a word chain:</p>
+<pre><center>moon soon son one tone lone</center></pre>
+<p>The main goal of this task was to find chains that were as long and interesting as possible.</p>
+<p>To store the word chains, I chose to utilize a <span class="lang:default highlight:0 decode:true  crayon-inline">vector</span> containing pointers to objects which are my own implementation of a double ended queue. I could have used two vectors instead, but I saw tremendous educational value in writing my own implementation of the double ended queue.</p>
+<p>The program reads in words one at a time from a file, and then calls a member function which adds the word to an existing chain, or creates a new one if necessary. It sounds simple, but there are a lot of cases to consider. For example, what if a word was not to appear more than once in a chain? Or if chains are set to grow one step at a time, for example:</p>
+<pre><center>a at ate rate irate pirate pirated</center></pre>
+<p>Such restrictions help generate more interesting word chains, but at a cost in terms of worst case execution time. For example, checking for duplicates before adding a word to a chain requires the program to walk through the entire data structure. That itself can slow things down drastically when reading in words from a file that is large in size.</p>
+<p>Without further ado, let's take this word chain generator for a spin.</p>
+<pre class="lang:default highlight:0 decode:true">Usage:./WordChainGenerator [OPTIONS] command command...
+        --target-file [/path/to/file.txt]
+        File to read words from. REQUIRED.
+
+        --log-file [true/false]
+        Stores all output into a file called chain_log.txt in current working directory. Recommended when using large target files. DEFAULT VALUE: false. OPTIONAL.
+
+        --allow-duplicates [true/false]
+        Prevents adding a word to a chain more than once. Caveat: can have drastic impact on run time when processing large text files. DEFAULT VALUE: true. OPTIONAL.
+
+        --step-growth [true/false]
+        Sets whether chains should grow at each step when being constructed. e.g. farm-form-for-nor-or. DEFAULT VALUE: false. OPTIONAL.
+
+        --filter-length [integer]
+        Filter out words that have a length less than or equal to the specified value. DEFAULT VALUE: 0. OPTIONAL.</pre>
+<p>It turns out that some interesting chains can be found when running the program against a text copy of <a href="https://sherlock-holm.es/stories/plain-text/advs.txt"><span style="text-decoration: underline;">The Adventure of Sherlock Holmes</span></a>.</p>
+<pre class="lang:default highlight:0 decode:true">./WordChainGenerator --target-file SherlockHolmes.txt --filter-length 2 --log-file true</pre>
+<pre class="lang:default highlight:0 decode:true">----------------------------------------------
+          FINDING LONGEST WORD CHAIN
+----------------------------------------------
+The longest chain(s) are:
+    Chain #0: fed fled feed need deed deep keep keen been seen see set yet pet pit put cut out but bet let get gem gum sum hum him his has was as us is it at
+
+Each chain(s) contain 60 total words.
+
+----------------------------------------------
+            FINDING LONGEST STRING
+----------------------------------------------
+The longest string(s) are: disproportionately
+
+The length of the longest string(s) are: 18
+
+The longest string(s) belong to the following word chain(s):
+    Chain #83251: disproportionately</pre>
+<p>Running the program with <span class="lang:default highlight:0 decode:true  crayon-inline"><code>--allow-step-growth true</code></span>  and <span class="lang:default highlight:0 decode:true  crayon-inline "><code>--allow-duplicates false</code></span> , the result is:</p>
+<pre class="lang:default highlight:0 decode:true">----------------------------------------------
+          FINDING LONGEST WORD CHAIN
+----------------------------------------------
+The longest chain(s) are:
+    Chain #235: flatter latter later late ate at a
+
+Each chain(s) contain 7 total words.
+
+----------------------------------------------
+            FINDING LONGEST STRING
+----------------------------------------------
+The longest string(s) are: disproportionately
+
+The length of the longest string(s) are: 18
+
+The longest string(s) belong to the following word chain(s):
+    Chain #94327: disproportionately</pre>
+<p>And that's only from a single text source. It should be interested to see the interesting chains that can be generated by trying different text sources and command line options!</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>

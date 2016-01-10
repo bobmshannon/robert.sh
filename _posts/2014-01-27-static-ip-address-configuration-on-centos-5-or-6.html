@@ -1,0 +1,47 @@
+---
+layout: post
+status: publish
+published: true
+title: Static IP address configuration on CentOS 5 or 6
+date: '2014-01-27 23:58:48 -0500'
+date_gmt: '2014-01-27 23:58:48 -0500'
+categories:
+- System Administration
+tags: []
+comments: []
+---
+<p>In CentOS, all network configuration files are stored under /etc/sysconfig/network-scripts. To make changes to your network configuration, it is as simple as editing a few files and then restarting the networking service for the changes to take effect.</p>
+<p>In this particular post we will configure networking on a stock CentOS system so that it can connect to the internet.</p>
+<h1>Configuring primary network interface</h1>
+<p>The primary network interface that your server uses to make outbound connections is usually called eth0. To configure it, we edit the file ifcfg-eth0 under <code>/etc/sysconfig/network-scripts</code>. So let’s do that.</p>
+<ol>
+<li>
+<p>Open /etc/sysconfig/network-scripts/ifcfg-eth0 with a text editor.</p>
+<pre class="lang:sh highlight:0 decode:true ">vi /etc/sysconfig/network-scripts/ifcfg-eth0</pre>
+</li>
+
+</li>
+<li style="padding-top: 15px;">
+<p>At this point we'll need to know the IP address assigned to us by our provider, the default gateway, and subnet mask. Modify ifcfg-eth0 accordingly and add the following settings:</p>
+<pre class="lang:default highlight:0 decode:true">DEVICE=eth0 # device name
+TYPE=Ethernet
+ONBOOT=yes
+BOOTPROTO=dhcp
+IPADDR=162.217.177.230 # IP Address
+NETMASK=255.255.255.0 # Subnet Mask
+GATEWAY=162.217.177.1 # Gateway</pre>
+<p>Note that there will probably be some existing settings already there such as HWADDR and UUID – leave them there.</li>
+<li>
+<p>Restart the networking service for your changes to take effect.</p>
+<pre class="lang:sh highlight:0 decode:true">service network restart</pre>
+</li>
+<li>
+<p>Verify that the server is connected to the internet.</p>
+<pre class="lang:sh highlight:0 decode:true">ping google.com</pre>
+<p>If the ping test works, then the server is now connected to the internet. If it doesn’t, then it means something is configured wrong. Try running <code>ifconfig</code> for some clues.</li>
+</ol>
+<h1>Adding secondary IP Addresses</h1>
+<p>Assuming that the primary interface eth0 is configured, we can add a secondary IP as long as it is in the same subnet by just running:</p>
+<pre class="lang:sh highlight:0 decode:true">ifconfig eth0:0 1.1.1.1 up</pre>
+<p>In this example, 1.1.1.1 is the secondary IP address to be added.</p>
+<p>Note that for each additional address that is added, eth0:X needs to be incremented 1. This number X is called the network alias number.</p>

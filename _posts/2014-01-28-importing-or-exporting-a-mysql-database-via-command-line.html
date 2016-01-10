@@ -1,0 +1,22 @@
+---
+layout: post
+status: publish
+published: true
+title: Importing or exporting a MySQL database via command line
+wordpress_id: 138
+wordpress_url: http://bobbyshannon.com/?p=138
+date: '2014-01-28 18:39:41 -0500'
+date_gmt: '2014-01-28 18:39:41 -0500'
+categories:
+- System Administration
+tags: []
+comments: []
+---
+<p>Many times it is useful to import or export a database via command line. For those of you who have used database management tools such as phpMyAdmin, you are aware how much of a pain it is importing or exporting large databases due to limits in PHP such as <code>max_execution_time</code>.</p>
+<h1>Importing a MySQL database</h1>
+<pre class="lang:sh highlight:0 decode:true">mysql -u USERNAME -p DATABASE_NAME &lt; BACKUP_NAME.sql</pre>
+<p>Note that -p specified that we are going to login with a password. We <strong>never</strong> specify a password directly due to security reasons, as every command you type is stored in a file called .bash_history.</p>
+<h1>Exporting a MySQL database</h1>
+<p>This command is exactly the same as the one used for importing, with two slight differences. We replace <code>&lt;</code> with <code>&gt;</code> and <code>mysql</code> with <code>mysqldump</code>.</p>
+<pre class="lang:default decode:true ">mysqldump -u USERNAME -p DATABASE_NAME &gt; BACKUP_NAME.sql</pre>
+<p>&nbsp;</p>

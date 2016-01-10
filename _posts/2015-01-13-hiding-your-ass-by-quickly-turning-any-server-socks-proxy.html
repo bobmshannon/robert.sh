@@ -1,0 +1,25 @@
+---
+layout: post
+status: publish
+published: true
+title: Hiding your ass by quickly turning any server SOCKS proxy
+date: '2015-01-13 01:31:24 -0500'
+date_gmt: '2015-01-13 01:31:24 -0500'
+categories:
+- System Administration
+- Technology
+- Blog
+tags: []
+comments: []
+---
+<p>A friend had shown me this quick little tip the other day. It involves the use of <a href="http://en.wikipedia.org/wiki/Port_forwarding#Dynamic_port_forwarding">dynamic port forwarding</a> to turn any server into a <a href="http://en.wikipedia.org/wiki/SOCKS">SOCKS proxy</a> as long as you have SSH access to said server.</p>
+<p>First, connect to the server you'd like to hide behind, let's use the one hosting this web site for demonstration purposes.</p>
+<pre class="lang:sh decode:true">ssh -ND {LISTEN-PORT} {USER}@{HOSTNAME}</pre>
+<p>In my case I chose port 80, and logged into my server as root.</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2015/01/ssh-socks-0.png"><img class="alignnone size-full wp-image-328" src="http://bobbyshannon.com/wp-content/uploads/2015/01/ssh-socks-0.png" alt="ssh-socks-0" width="561" height="290" /></a></p>
+<p>Finally, re-configure the program that you'd like to route through the proxy. Let's add a layer of anonymity to our web browsing and update some connection settings in Firefox.</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2015/01/ssh-socks-1.png"><img class="alignnone size-full wp-image-329" src="http://bobbyshannon.com/wp-content/uploads/2015/01/ssh-socks-1.png" alt="ssh-socks-1" width="594" height="593" /></a></p>
+<p>The SOCKS Hosts will be localhost or 127.0.0.1, and the port will be 80 or the value you chose for {LISTEN-PORT} in the command ran earlier.</p>
+<p>Finally, you may want to double check that everything is working by going to a site such as <a href="http://ipchicken.com">IPChicken</a>.</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2015/01/ssh-socks-2.png"><img class="alignnone size-full wp-image-330" src="http://bobbyshannon.com/wp-content/uploads/2015/01/ssh-socks-2.png" alt="ssh-socks-2" width="635" height="559" /></a>.</p>
+<p>As you can see I am now browsing the internet through my server (which resolves to 54.186.93.148 at the time of this writing).</p>

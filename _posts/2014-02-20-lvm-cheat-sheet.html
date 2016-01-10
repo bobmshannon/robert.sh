@@ -1,0 +1,26 @@
+---
+layout: post
+status: publish
+published: true
+title: LVM Cheat Sheet
+date: '2014-02-20 18:33:31 -0500'
+date_gmt: '2014-02-20 18:33:31 -0500'
+categories:
+- System Administration
+- Blog
+tags: []
+comments: []
+---
+<p>I'm not very good at memorizing things. That's why I think it is a good idea to keep verbose information documented somewhere for easy access later on.</p>
+<h1>Creating Physical Volumes:</h1>
+<pre class="lang:sh decode:true">pvcreate /path/to/device</pre>
+<h1>Creating Volume Groups:</h1>
+<pre class="lang:sh decode:true">vgcreate VOLGROUPNAME /path/to/physicalvolume1 /path/to/physical/volume2</pre>
+<h1>Creating Logical Volumes:</h1>
+<pre class="lang:sh decode:true">lvcreate -L 5G VOLGROUPNAME</pre>
+<h1>View Existing Physical Volumes:</h1>
+<pre class="lang:sh decode:true">pvdisplay</pre>
+<h1>View Existing Volume Groups:</h1>
+<pre class="lang:sh decode:true">vgdisplay</pre>
+<h1>Viewing Existing Logical Volumes:</h1>
+<pre class="lang:sh decode:true">lvdisplay</pre>

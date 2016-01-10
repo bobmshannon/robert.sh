@@ -1,0 +1,76 @@
+---
+layout: post
+status: publish
+published: true
+title: Upgrading disk space on a KVM based VPS
+date: '2013-12-30 20:41:49 -0500'
+date_gmt: '2013-12-30 20:41:49 -0500'
+categories:
+- System Administration
+tags: []
+comments: []
+---
+<p>If you have a VPS with a provider that is using <a href="http://www.linux-kvm.org/page/Main_Page">KVM</a> virtualization technology, you may find yourself running out of disk space at one point. After all, one of the great benefits of a VPS over a dedicated server is that they are scalable on the fly. Resources from the host node can be allocated to any VPS instantly, including disk space.</p>
+<p>I currently have a 10 GB VPS, but want to upgrade to 20 GB of storage. On any linux machine, you can see how much disk space is free on each mounted filesystem by running <code>df -h</code>. Note that the -h flag converts all units to Megabytes or Gigabytes so that it is "human readable".</p>
+<pre class="lang:default decode:true  ">[root@test ~]# df -h
+Filesystem Size Used Avail Use% Mounted on
+/dev/vda1 8.8G 698M 7.6G 9% /
+tmpfs 249M 0 249M 0% /dev/shm</pre>
+<p>The main partition that is of interest is <code>/dev/vda1</code>. We can see that it is mounted on <code>/</code>, but has a size of only 8.8G. What gives? My provider just upgraded my VPS to 20 GB of storage! </p>
+
+<p>Let's double check that that the size of the VPS's hard drive does actually have a capacity of 20 GB. We can do that by using the <code>fdisk -l</code> command.</p>
+<pre class="lang:default decode:true">[root@test ~]# fdisk -l
+
+Disk /dev/vda: 21.4 GB, 21474836480 bytes
+255 heads, 63 sectors/track, 2610 cylinders
+Units = cylinders of 16065 * 512 = 8225280 bytes
+
+Device Boot Start End Blocks Id System
+/dev/vda1 * 1 1175 9434912+ 83 Linux
+/dev/vda2 1175 1306 1048576 82 Linux swap / Solaris</pre>
+<p>And it does. This means we have an extra 10 GB of space to work with that we can use to mount another partition, or expand an existing one!</p>
+<h1>Expanding an existing partition</h1>
+<p>This is actually really easy to do by booting your VPS into a <a href="http://gparted.org/">GParted </a>Live CD. Download the ISO from the web site and mount it the virtual CD drive of your VPS and make sure that it has the highest priority in the boot order. After booting, you will be prompted with a graphical utility which will allow you to resize your partitions with ease by just simply dragging your cursor.</p>
+<h1>Creating a new partition</h1>
+<p>Before we mount the new partition, we first need to create it. We will use the fdisk tool for this. To get started we will enter <code>fdisk /dev/vda</code>.</p>
+
+<pre class="lang:default decode:true">[root@test ~]# fdisk /dev/vda
+
+The number of cylinders for this disk is set to 2610.
+There is nothing wrong with that, but this is larger than 1024,
+and could in certain setups cause problems with:
+1) software that runs at boot time (e.g., old versions of LILO)
+2) booting and partitioning software from other OSs
+(e.g., DOS FDISK, OS/2 FDISK)
+
+Command (m for help):</pre>
+<p>Then, we will type <code>n</code> to create a new partition, and then type <code>p</code> to specify a primary partition. You will then be asked to choose a partition number (you can check the number of each partition using the now familiar <code>fdisk -l</code> command).</p>
+
+<p>For example, if you currently have 2 partitions then choose the number 3, or the next available number not assigned to an existing partition. When you are asked to specify the "First cylinder", use the default value. When asked to specify the last cylinder, enter the size of the new partition (you would type +10G for a partition 10GB in size). It should look something like this:</p>
+
+<pre class="lang:default decode:true">Partition number (1-4): 3
+First cylinder (1306-2610, default 1306):
+Using default value 1306
+Last cylinder or +size or +sizeM or +sizeK (1306-2610, default 2610): +10G</pre>
+<p>Next, tell fdisk to write the changes. Type <code>w</code> to do this.
+<pre class="lang:default decode:true">Command (m for help): w
+The partition table has been altered!</pre>
+<p>The machine now needs to be rebooted so that the kernel uses the new partition table. Issue a graceful restart:</p>
+<pre class="lang:default decode:true">[root@test ~]# shutdown -r now</pre>
+<p>Lastly, format the new partition with a filesystem by using mkfs and running:</p>
+<pre class="lang:default decode:true">mkfs -t ext3 /dev/vda3</pre>
+<p>This will format the /dev/vda3 partition with an ext3 file system.</p>
+<h2>Mounting a newly created partition</h2>
+<p>Let's mount this thing so that we can use the extra space. It just so happens that I needed the extra space in /home (where all of my customer files are stored), so I am going to mount this partition to /home. Note that I already have files in there so I will rename the old one first and then merge it back together again.</p>
+<pre class="lang:default decode:true">mv /home /home2
+mount /dev/vda3 /home
+cd /home2
+mv * /home
+rm -rf /home2</pre>
+<p>Of course, you can choose any other mount point that you'd like:</p>
+<pre class="lang:default decode:true">mount /dev/vda3 /path/to/mountpoint</pre>
+<p>The final step is to add an entry into /etc/fstab so that your new filesystem is mounted every time the machine boots:</p>
+<pre class="lang:default decode:true">echo "/dev/vda3 /home ext3 default 0 1" &gt;&gt; /etc/fstab</pre>
+<p>And we're done.</p>
+<h1>Disclaimer</h1>
+<p>Obviously, this is pretty hacky and you certainly do not want to be creating a new partition every time you need extra space, so you may wish to expand existing partitions instead using GParted. However, that will most certainly require taking your machine offline for some period of time while creating a new partition can be done without any downtime.</p>

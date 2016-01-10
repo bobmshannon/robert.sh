@@ -1,0 +1,78 @@
+---
+layout: post
+status: publish
+published: false
+title: 'C++ Project: The Netflix Prize'
+author:
+  display_name: Bobby Shannon
+  login: bobby
+  email: rshannon@buffalo.edu
+  url: ''
+author_login: bobby
+author_email: rshannon@buffalo.edu
+wordpress_id: 206
+wordpress_url: http://bobbyshannon.com/?p=206
+date: '2014-05-25 19:23:20 -0400'
+date_gmt: '2014-05-25 19:23:20 -0400'
+categories:
+- Programming
+- Projects
+tags: []
+comments: []
+---
+<h2>Overview</h2>
+<p>The <a href="http://en.wikipedia.org/wiki/Netflix_Prize">Netflix Prize</a> was an open competition ran from 2006-2009. The goal was to create a system that recommends movies to a particular user based on the type of movies that they and others have rated well in the past. The $1 million prize was eventually awarded to <a href="http://www2.research.att.com/~volinsky/netflix/bpc.html">BellKor's Pragmatic Chaos</a> in 2009. This team developed an algorithm that was an "improved" Netflix's existing recommendation system, generating more accurate movie recommendations.</p>
+<p>A recent project I worked on was a spinoff of this challenge, where I implemented a simpler predictive model for the Netflix Prize challenge using averaging and <a href="http://grouplens.org/datasets/movielens/">MovieLens </a>data set (similar to the one Netflix uses in house).</p>
+<p>The algorithm used in this project calculated the following using the MovieLens data set (courtesy of <a href="http://www.cse.buffalo.edu/~regan/">KWR </a>at UB):</p>
+<ol>
+<li>$r_m =$ the average star rating by users who rated movie $m$.</li>
+<li>$u_g =$ the average rating by user $u$ of movies $m$ that belong to genre $g$</li>
+<li>$p_{u,g} =$ the user's "preference factor" for the movie of a specific genre $g$. This was mathematically defined as $u_g$ divided by the average rating for those same movies rated by users overall.</li>
+</ol>
+<p>With that being said, my main job was to create an algorithm that recommended movies to a specific user using these three things. In order to do this, I needed to find the top 10 or 20 movies that maximized $r_m $ $\times$ $ p_{u,g}$, where $g$ is the genre of movie $m$ of course.</p>
+<h2>The Algorithim</h2>
+<div style="background: #eee; padding: 20px; margin-bottom: 25px;"><span style="color: #000000;">1.</span><strong><span style="color: #000000;">  Average rating computation</span><br />
+</strong></p>
+<ul>
+<li>To calculate the average rating of a movie, the program iterates through the <strong>WHOLE</strong> user database, a process which takes <strong>O(U)</strong> or <strong>$\theta$(U) </strong>time. As it analyzes each user object, it iterates through a list of ratings which takes <strong>O(R)</strong> time. Note that we're not reading the ratings into one big container here, we are keeping a tally as we go and once we're done iterating we'll finally calculate and return the average rating.</li>
+</ul>
+<p><span style="color: #000000;">2.<strong> $u_g$ calculation</strong></span></p>
+<ul>
+<li>To calculate $u_g$, the program iterates through a WHOLE set of R ratings which already mentioned has a time complexity of <strong>O(R)</strong>. This is done for only one user.</li>
+</ul>
+<ul>
+<li>Then, if a rating matches the specific genre, the program needs to get the movie object for that movie ID. To do this, the program searches through the movie database which takes <strong>O(logM)</strong> (see <a href="http://www.cplusplus.com/reference/set/set/find/">man page</a> for find() method in c++ sorted set), where <strong>M</strong> is the number of movies in the database. It does this multiple times depending on how many movie ratings for a specific genre a user has made -- perhaps <strong>O(RlogM)</strong> would be a proper description.</li>
+</ul>
+<p><span style="color: #000000;">3. <strong>Preference factor ($p_{u,g}$) calculation</strong></span></p>
+<ul>
+<li>To do this calculation, the program first finds $u_g$ (see above for complexity details).</li>
+</ul>
+<ul>
+<li>Then, it finds the overall star rating of a particular movie by users overall (see above for complexity details). To do this, the average rating function is called recursively for each movie that belongs to genre $g$. The number of movie averages that need to be calculated is completely dependent on the MovieLens data and rating habits of our critics, but we can call it <strong>O($M_g$)</strong> for movies M that belong to genre $g$.</li>
+</ul>
+<p><span style="color: #000000;">4. <strong>Movie recommendation</strong></span></p>
+<ul>
+<li>First, we construct a database (using a C++ STL set) of movies sorted by average rating, a process that has a complexity of <strong>O(MlogM)</strong>.</li>
+</ul>
+<ul>
+<li>Then, we compute the preference factor 6 times, once for each genre (see above for complexity details).</li>
+</ul>
+<ul>
+<li>We then calculate (preference factor of genre $g$ for user <strong>U</strong> $\times$ average rating of movie <strong>M</strong> in genre $g$) for each movie <strong>M</strong>. This takes <strong>O(M)</strong> or <strong>$\theta$(M)</strong> time.</li>
+</ul>
+<ul>
+<li>Then, we construct a database (using a C++ STL set) sorted by (preference factor of genre $g$ for user <strong>U</strong> $\times$ average rating of movie <strong>M</strong> in genre $g$).<br />
+This is a process which (yet again) is logarithmic in size, <strong>O(MlogM)</strong>.</li>
+</ul>
+<ul>
+<li>Then, we return the top $k$ entries (where $k$ is user specified) in the above database. These are the $k$ movies that we recommend a user to watch. The time for this is actually negligible, as $k$ will always be a reasonable value, usually 10, 20, 30, etc but certainly  $k$ $\lt $ $\lt$ $ M$.</li>
+</ul>
+</div>
+<h2>Taking it for a test drive</h2>
+<p>That's all very good, but last but not least, let's run the program and see what happens! We'll calculate movie recommendations for <strong>user #1</strong>.</p>
+<p>We first run the program and then let it build the movie &amp; user databases:</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2014/05/netflix1.png"><img class="alignnone size-full wp-image-253" src="http://bobbyshannon.com/wp-content/uploads/2014/05/netflix1.png" alt="netflix1" width="704" height="107" /></a></p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2014/05/netflix2.png"><img class="alignnone size-full wp-image-251" src="http://bobbyshannon.com/wp-content/uploads/2014/05/netflix2.png" alt="netflix2" width="707" height="353" /></a></p>
+<p>Now that our sorted databases are constructed, we can run the algorithm and and find movie recommendations for <strong>user #1</strong>:</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2014/05/netflix3.png"><img class="alignnone size-full wp-image-252" src="http://bobbyshannon.com/wp-content/uploads/2014/05/netflix3.png" alt="netflix3" width="841" height="460" /></a></p>
+<p>And these results do make sense. If our recommendations are based off of average ratings, we'd expect to see some high rated movies on this list (you know your Pulp Fictions, Schindler's List, Shawshank Redemption, etc), which we do. And this is only using a "simple" predictive model. Imagine the "accurate" results we could get using something a little more complex that takes into account more variables!</p>

@@ -1,0 +1,86 @@
+---
+layout: post
+status: publish
+published: true
+title: Logging into a remote webpage using PHP and cURL
+date: '2014-01-19 08:41:25 -0500'
+date_gmt: '2014-01-19 08:41:25 -0500'
+categories:
+- Programming
+- Web Development
+- Blog
+tags: []
+comments: []
+---
+<p>I recently developed a utility written using PHP that logins into a ISP's web control panel and automatically reboot a specified server. While I won't go into the specifics of that particular project here, I will talk about something that really came in handy. It is called cURL.</p>
+<p>cURL is a piece of software that provides a library and command line tools for transferring data using various protocols. It supports HTTP/HTTPS, FTP/FTPS, SCP, Telnet, and many more! It is quite a versatile utility.</p>
+<p>PHP is a "general-purpose scripting language that is especially suited to web development". Facebook, Yahoo, and Wikipedia are examples of very popular web sites built using PHP.  It is the most popular programming languages used by web sites at the time of this writing.</p>
+<p>So, how do we use PHP to log into a remote page and then pull some content? First it's useful to know how to fetch a web page that doesn't require using a login to reach.</p>
+<h1>Fetching a remote page</h1>
+<pre class="lang:php decode:true">&lt;?php
+	// Initialize cURL
+	$ch = curl_init();
+
+	// Setup options for a cURL transfer
+	curl_setopt_array(
+		$ch, array(
+		CURLOPT_URL =&gt; 'http://google.com/',
+		CURLOPT_USERAGENT =&gt; 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; .NET CLR 1.1.4322)',
+		CURLOPT_FOLLOWLOCATION =&gt; true
+	));
+
+	// Return web page
+	return curl_exec($ch);
+?&gt;</pre>
+<p>As you can see, there isn't much going on here and the code is very simple. I initialized cURL, set the options, and then returned the result. Also notice how the options are stored in a array, this makes the code much cleaner as I don't have to call curl_setopt more than once. Let's take a look at the options I used:</p>
+<ul>
+<li><strong>CURLOPT_URL</strong> - This is the URL of the web page that you want to fetch.</li>
+<li><strong>CURLOPT_USERAGENT</strong> - This sets the user agent string to use when connecting to the remote web server.</li>
+<li><strong>CURLOPT_FOLLOWLOCATION</strong> - If set to true, cURL will follow all redirects.</li>
+</ul>
+<p>That's cool. But how do I login to a page, twitter.com for example?</p>
+<h1>Logging into a remote page</h1>
+<p>The goal is to login to twitter.com using cURL. Every time that I submit a form, an HTTP POST operation occurs which contains data such as my username and password and sends it to the server. To find out the specifics, I am using the network inspection plugin provided by my web browser.</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2014/01/twitterPOST.png"><img class="alignnone size-full wp-image-115" alt="twitterPOST" src="http://bobbyshannon.com/wp-content/uploads/2014/01/twitterPOST.png" width="622" height="503" /></a></p>
+<p>With the inspection tool enabled, I ended up with the above after submitting the login form. The line that I will be using is:</p>
+<pre class="lang:default highlight:0 decode:true">session%5Busername_or_email%5D={USERNAME}&amp;session%5Bpassword%5D={PASSWORD}&amp;authenticity_token=13dbbfcb8648904d6e4cb047022f53071ea86ad2&amp;scribe_log=&amp;redirect_after_login=&amp;authenticity_token=13dbbfcb8648904d6e4cb047022f53071ea86ad2&amp;remember_me=1</pre>
+<p>Now that I have obtained that, I will use cURL to login to Twitter. Note that I replaced my username and password with <code>{USERNAME}</code> and <code>{PASSWORD}</code> for security purposes of course.</p>
+<pre class="lang:php decode:true">&lt;?php
+	// Initialize cURL
+	$ch = curl_init();
+
+	// Setup options for a cURL transfer
+	curl_setopt_array(
+		$ch, array(
+		CURLOPT_URL =&gt; 'https://twitter.com/login',
+		CURLOPT_USERAGENT =&gt; 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; .NET CLR 1.1.4322)',
+		CURLOPT_FOLLOWLOCATION =&gt; true,
+		CURLOPT_COOKIEJAR =&gt; 'cookie.txt',
+		CURLOPT_COOKIEFILE =&gt; 'cookie.txt',
+		CURLOPT_POST =&gt; true,
+		CURLOPT_POSTFIELDS =&gt; 'session%5Busername_or_email%5D={USERNAME}&amp;session%5Bpassword%5D={PASSWORD}&amp;authenticity_token=13dbbfcb8648904d6e4cb047022f53071ea86ad2&amp;scribe_log=&amp;redirect_after_login=&amp;authenticity_token=13dbbfcb8648904d6e4cb047022f53071ea86ad2&amp;remember_me=1'
+	));
+
+	// Return web page
+	return curl_exec($ch);
+?&gt;</pre>
+<p>Notice how I used more options this time:</p>
+<ul>
+<li><strong>CURLOPT_COOKIEFILE</strong> - The name of the file containing the cookie data.</li>
+<li><strong>CURLOPT_COOKIEJAR</strong> - The name of the file to save all internal cookies when the session is closed.</li>
+<li><strong>CURLOPT_POST</strong> - If set to true, data will be sent via HTTP POST as per the POSTFIELDS option (see below).</li>
+<li><strong>CURLOPT_POSTFIELDS</strong> - The full data to post in a specified HTTP POST operation</li>
+</ul>
+<p>Since I'm using cookies and storing them, I can now actually fetch data from Twitter when logged in. I just need to update the URL and then execute the cURL session again. For example, I can fetch the account settings page:</p>
+<pre class="lang:php decode:true">	curl_setopt_array(
+		$ch, array(
+		CURLOPT_URL =&gt; 'https://twitter.com/settings/profile'
+	));
+        return curl_exec($ch);</pre>
+<h1>What next?</h1>
+<p>Now we can login to a web page and fetch data from a password protected page. You can now take this data, store it as a string and then do as you please.</p>
+<pre class="lang:php decode:true">$string = curl_exec($ch);
+
+function filterData($string) {
+# Code that filters the data accordingly goes here...
+}</pre>

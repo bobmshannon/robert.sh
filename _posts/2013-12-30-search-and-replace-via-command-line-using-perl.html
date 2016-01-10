@@ -1,0 +1,29 @@
+---
+layout: post
+status: publish
+published: true
+title: Search and replace via command-line using Perl
+date: '2013-12-30 01:30:50 -0500'
+date_gmt: '2013-12-30 01:30:50 -0500'
+categories:
+- System Administration
+- Programming
+- Blog
+tags:
+- perl
+- search and replace
+- pattern matching
+- command line
+comments: []
+---
+<p>Many times I've encountered situations where I needed to replace a specific re-occurring string in a file. Manually editing the file with a text editor is always an option, but when your target string occurs dozens of times in a large file you might be there for a while.</p>
+<p>This is where using Perl can come in handy and save you a lot of time. I'll cut to the chase and give you the one-liner that can be used on any machine that has Perl installed:</p>
+<pre>perl -pi -e 's/OLDSTRING/NEWSTRING/g' /path/to/file</pre>
+<p>This replaces all instances of OLDSTRING with NEWSTRING in the specified file.</p>
+<p>It's important to note that this command overwrites the file with your changes permanently, so backing up the file first is always a good idea.</p>
+<h1>A Real World Example</h1>
+<p>One could use this command to edit many DNS zones at once via command line. I recently needed to point many domains to a new IP address to complete a server migration. The zone files in my particular case were stored in /var/named, in the format domain.db, so I ran the following on the DNS server:</p>
+<pre>perl -pi -e 's/1.1.1.1/2.2.2.2/g' /var/named/*.db&lt;/code&gt;
+service named reload</pre>
+<p>where <code>1.1.1.1</code> is the old IP address the sites were pointed to and <code>2.2.2.2</code> was the new IP address. I then reloaded the named service so that the changes became realized. If you noticed I also used <code>*</code> when specifying the file name, this is a wildcard operator.</p>
+<p>Instead of manually editing each zone file for each domain (which would take a very long time for a lot of domains), I completed the whole process within a few seconds using Perl.</p>

@@ -1,0 +1,52 @@
+---
+layout: post
+status: publish
+published: true
+title: Simplifying content management using PHP header & footer includes
+date: '2014-01-03 05:53:59 -0500'
+date_gmt: '2014-01-03 05:53:59 -0500'
+categories:
+- System Administration
+- Web Development
+- Blog
+tags: []
+comments: []
+---
+<p>You've finally coded that 20 page company web site using HTML and CSS and are ready for it to go live. Not so fast<strong>!</strong> Have you thought about how you are going to maintain such a large web site over time? You can integrate the web site with a content management system such as Joomla or WordPress, but that is a lot of (perhaps unnecessary) work!</p>
+<p>When thinking about content management, it is good foresight to ask your self what can you do to make your life easier? One thing you can do is create header and footer includes, so that you can edit those sections which appear on your whole web site by only editing one file.</p>
+<h2>Setting up the PHP Includes</h2>
+<p>What we are going to do here is create two files called header.php and footer.php and then include them in each page of your web site. In each file you will put your header and footer code, it should look something like this:</p>
+<h1>header.php</h1>
+<pre class="lang:xhtml decode:true" title="header.php">&lt;div id="header"&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Link One&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Link Two&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Link Three&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href="#"&gt;Link Four&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;</pre>
+<h1>footer.php</h1>
+<pre class="lang:xhtml decode:true" title="header.php">&lt;div id="footer"&gt; 
+    &lt;p&gt;&amp;copy; 2014 Your Company&lt;/p&gt;
+&lt;/div&gt;</pre>
+<p>Put those two files inside a folder called includes/ in your web site's root directory. Then, we need to setup add the PHP includes into each page of your web site.</p>
+<h1>page-name.html</h1>
+<pre class="lang:xhtml decode:true">&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;Page Name&lt;/title&gt;
+    &lt;/head&gt;
+
+    &lt;body&gt;
+         &lt;?php include("/path/to/root/includes/header.php"); ?&gt;
+
+         &lt;!--Content HTML goes here--&gt;
+
+         &lt;?php include("/path/to/root/includes/footer.php"); ?&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</pre>
+<p>Now, this of course won't work as is. We have PHP code inside a HTML document! How do we let our web server know that there is PHP code inside each file that needs to be executed?</p>
+<h2>Executing PHP code inside an HTML document</h2>
+<p>All this requires is a one liner in .htaccess for servers using Apache or Litespeed:</p>
+<h1>.htaccess</h1>
+<pre class="show-plain-default:true lang:sh decode:true">AddType application/x-httpd-php .html</pre>
+<p>And that's all there is to it. Your web server is now parsing PHP code in your HTML files.</p>

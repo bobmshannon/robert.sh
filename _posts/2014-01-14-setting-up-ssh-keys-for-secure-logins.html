@@ -1,0 +1,36 @@
+---
+layout: post
+status: publish
+published: false
+title: Setting up SSH keys for Secure Logins
+wordpress_id: 96
+wordpress_url: http://bobbyshannon.com/?p=96
+date: '2014-01-14 09:42:42 -0500'
+date_gmt: '2014-01-14 09:42:42 -0500'
+categories:
+- System Administration
+- Blog
+tags: []
+comments: []
+---
+<p>Logging into your servers remotely with a username and password isn't exactly the most secure way of doing things.  A password can be cracked by brute force, but using a public-private key pair is practically impossible to compromise unless someone manages to steal your private key and pass-phrase. This effectively removes the possibility of brute force attacks assuming the private key is not compromised.</p>
+<p>In this writeup I will go through how to generate a public-private key pair and how to use them.</p>
+<h1>Generating the key pair</h1>
+<p>The first thing that we need to do is generate the public-private key pair. On the remote linux machine that you want to connect to, run:</p>
+<pre class="lang:sh highlight:0 decode:true">ssh-keygen -t rsa</pre>
+<p>You will be prompted for a location to store your public and private key. Additionally, you will be asked whether you want to set a pass-phrase on your private key or not. It is highly recommended that you do so just in case the private key accidentally falls into the wrong hands.</p>
+<h3> Installing public key on the remote machine</h3>
+<p>We need to setup the remote machine to use key based authentication. To do this, we add the public key to a file called .authorized_keys in the users home directory -- the SSH daemon knows to check that file when processing incoming connections. In this particular case, we are setting up key based authentication for the user root.</p>
+<pre class="lang:default highlight:0 decode:true">cd /root
+cat /path/to/public.key &gt;&gt; .ssh/authorized_keys</pre>
+<h3> Installing private key on the local machine</h3>
+<p>We're almost done. We just need to install the private key on to the local machine that we are connecting from. In my particular case, I am using Windows 7 and PuTTY to connect.</p>
+<p>The first thing that we need to do is use <a href="http://the.earth.li/~sgtatham/putty/latest/x86/puttygen.exe">PuTTY</a> to concert our private key into a format that PuTTY accepts.</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2014/01/PuTTYGen1.png"><img class="alignnone size-full wp-image-103" alt="PuTTYGen1" src="http://bobbyshannon.com/wp-content/uploads/2014/01/PuTTYGen1.png" width="657" height="590" /></a></p>
+<p>Click 'Load', then select then choose the private key that you generated earlier (you'll need to download it from the remote server first). Enter your passphrase when prompted. Then, click 'Save private key'. You should now have a file with an extension of .ppk.</p>
+<p>Now, we just simply load this .ppk file into PuTTY:</p>
+<p><a href="http://bobbyshannon.com/wp-content/uploads/2014/01/PuTTY1.png"><img class="alignnone size-full wp-image-104" alt="PuTTY1" src="http://bobbyshannon.com/wp-content/uploads/2014/01/PuTTY1.png" width="618" height="554" /></a></p>
+<p>Click 'Browse...' and then choose the .ppk file that you saved earlier.</p>
+<p>And that's it! Now you can connect to the remote machine using PuTTY with key based authentication.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>

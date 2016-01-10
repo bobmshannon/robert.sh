@@ -1,0 +1,103 @@
+---
+layout: post
+status: publish
+published: true
+title: Securing your RHEL/CentOS/Fedora server using iptables
+author_login: bobby
+author_email: rshannon@buffalo.edu
+wordpress_id: 49
+wordpress_url: http://bobbyshannon.com/?p=49
+date: '2014-01-02 01:52:00 -0500'
+date_gmt: '2014-01-02 01:52:00 -0500'
+categories:
+- System Administration
+- Blog
+tags:
+- security
+- iptables
+- iptables tutorial
+- centos
+- opening ports
+- closing ports
+- blocking ip address
+- linux
+- fedora
+- rhel
+comments: []
+---
+
+<p>For those of you familiar with Windows systems, you already know about Windows Firewall which is installed by default. On Linux systems, there is also adefault firewall installed. It is called <strong>iptables</strong>. I will show you how to turn iptables on/off, view &amp; flush your rule set, and filter traffic based on destination/source port, protocol (TCP, UDP, ICMP). Note that there is much more that can be done with iptables as it is a very powerful tool, but in this writeup I will only be covering the basics. An intrigued reader might be interested in reading more about other features such as pattern matching and rate limiting.</p>
+<h2><strong>Turning iptables on/off</strong></h2>
+<p>To enable/disable the iptables firewall, we treat it like any other running service.</p>
+<h3>Enable:</h3>
+<pre class="lang:sh highlight:0 decode:true">service iptables start</pre>
+<h3>Disable:</h3>
+<pre class="lang:sh highlight:0 decode:true">service iptables stop</pre>
+<p>That was easy. Don't start popping bottles just yet.</p>
+<h2><strong>Managing iptables rule set</strong></h2>
+<p>Three of the most common things that you'll need to do when managing your rule set is 1) view the current rule set, 2) flush the current rule set, 3) and save the current rule set so that it is not lost after a reboot.</p>
+<h3>View current rule set:</h3>
+<pre class="lang:sh highlight:0 decode:true">iptables -L</pre>
+<p>Sample output:</p>
+<pre class="lang:sh highlight:0 decode:true">[root@test ~]# iptables -L
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination</pre>
+<h3>Flush rule set:</h3>
+<pre class="lang:sh highlight:0 decode:true">iptables -F</pre>
+<p><strong>Important Note:</strong> The default policy for iptables is to drop all traffic, so if you are connected to your server remotely via SSH and then issue this command you will be locked out of your machine until you reboot it. To prevent this from happening, create a bash script which flushes the firewall but then sets the default policy back to accepting all traffic:</p>
+<pre class="lang:sh highlight:0 decode:true">iptables -F
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT</pre>
+<p>As with anything that you may not know much about, it's best to tread lightly. Be careful when flushing your firewall to not lock yourself out!</p>
+<h3>Save current rule set</h3>
+<pre class="lang:sh highlight:0 decode:true">service iptables save</pre>
+<p>If you don't save your rule set, it will be lost after each reboot.</p>
+<h2><strong>Filtering inbound &amp; outbound traffic with iptables<br />
+</strong></h2>
+<p>When creating rules to filter inbound or outbound traffic, the command you need to run will take the following basic form:</p>
+<pre class="lang:default highlight:0 decode:true">iptables -A &lt;INPUT/OUTPUT&gt; -p &lt;PROTOCOL&gt; -j &lt;ACCEPT/DROP&gt;</pre>
+<p>So, for example, if we wanted to block all inbound UDP traffic to the server we'd use:</p>
+<pre class="lang:sh highlight:0 decode:true">iptables -A INPUT -p udp -j DROP</pre>
+<p>Or maybe we want to allow all outbound TCP traffic:</p>
+<pre class="lang:default highlight:0 decode:true">iptables -A OUTPUT -p tcp -j ACCEPT</pre>
+<p>That's cool, but those are some pretty general rules. How do we get a little more specific and filter traffic based on ports and IP addresses?</p>
+<h3>Source and destination ports<span style="text-decoration: underline;"><br />
+</span></h3>
+<p>We can create rules which filter packets based on their source or destination ports. We use the command line flags --dport and --sport.</p>
+<h4>Destination port:</h4>
+<pre class="lang:default highlight:0 decode:true">iptables -A &lt;INPUT/OUTPUT&gt; -p &lt;PROTOCOL&gt; --dport &lt;PORT&gt; -j &lt;ACCEPT/DROP&gt;</pre>
+<h4>Source port:</h4>
+<pre class="lang:default highlight:0 decode:true">iptables -A &lt;INPUT/OUTPUT&gt; -p &lt;PROTOCOL&gt; --sport &lt;PORT&gt; -j &lt;ACCEPT/DROP&gt;</pre>
+<h4>Destination and Source port combined together:</h4>
+<pre class="lang:default highlight:0 decode:true">iptables -A &lt;INPUT/OUTPUT&gt; -p &lt;PROTOCOL&gt; --dport &lt;PORT&gt; --sport &lt;PORT&gt; -j &lt;ACCEPT/DROP&gt;</pre>
+<h3>Source and destination IP addresses</h3>
+<p>Just how we can filter packets based on ports, we can do the same based on IP address. Instead we use the -s and -d flags.</p>
+<h4>Destination IP:</h4>
+<pre class="lang:sh highlight:0 decode:true">iptables -A &lt;INPUT/OUTPUT&gt; -p &lt;PROTOCOL&gt; -d &lt;IPADDRESS&gt; -j &lt;ACCEPT/DROP&gt;</pre>
+<h4>Source IP:</h4>
+<pre class="lang:default highlight:0 decode:true">iptables -A &lt;INPUT/OUTPUT&gt; -p &lt;PROTOCOL&gt; -s &lt;IPADDRESS&gt; -j &lt;ACCEPT/DROP&gt;</pre>
+<h4>Destination and Source IP combined:</h4>
+<pre class="lang:default highlight:0 decode:true">iptables -A &lt;INPUT/OUTPUT&gt; -p &lt;PROTOCOL&gt; -d &lt;IPADDRESS&gt; -s &lt;IPADDRESS&gt; -j &lt;ACCEPT/DROP&gt;</pre>
+<h2><strong>Real world examples</strong></h2>
+<p>We now know how to manage our rule set, turn on/off the firewall, and create new rules based on IP address and port. Let's look at some real world examples.</p>
+<h3>Securing a web server</h3>
+<p>A web server needs port 80 inbound TCP and maybe remote SSH access for management purposes in order to function properly. Let's close all inbound UDP &amp; TCP ports but keep TCP 22 and TCP 80 open.</p>
+<pre class="lang:sh highlight:0 decode:true">iptables -A INPUT -p udp -j DROP
+iptables -A INPUT -p tcp -j DROP
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT</pre>
+<h3>Blocking a malicious IP</h3>
+<p>Perhaps you have a single IP address 1.1.1.1 trying to carry out a DoS attack or something else naughty. Let's block it with iptables.</p>
+<pre class="lang:default highlight:0 decode:true">iptables -A INPUT -s 1.1.1.1 -j DROP</pre>
+<h3>Securing SSH</h3>
+<p>Most people just change their port and setup SSH key based authentication, but you can also use iptables for even more security. Let's restrict access to SSH port 22 for our IP address, only (which will be 1.1.1.1 in this example).</p>
+<pre class="lang:default highlight:0 decode:true ">iptables -A INPUT -p tcp --dport 22 -j DROP
+iptables -A INPUT -p tcp --dport 22 -s 1.1.1.1 -j ACCEPT</pre>
+<p>&nbsp;</p>
