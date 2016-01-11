@@ -230,20 +230,21 @@
         text-decoration: none;
     }
 
-    .post-link {
+    .title {
+        font-size: 18px;
         width: 80%;
         white-space: nowrap;
         text-overflow: ellipsis;
         overflow: hidden;
     }
 
-    .post-meta {
+    .meta {
         width: 20%;
         text-align: right;
     }
 
-    .post-meta,
-    .post-link {
+    .title,
+    .meta {
         display: block;
 
         @include media-query($on-palm) {
@@ -254,14 +255,10 @@
     }
 }
 
-.post-meta {
+.post-meta,
+.meta {
     font-size: $small-font-size;
     color: $grey-color;
-}
-
-.post-link {
-    display: block;
-    font-size: 18px;
 }
 
 
@@ -283,6 +280,11 @@
 }
 
 .post-content {
+    @include border-radius(5px);
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 15px;
+
     margin-bottom: $spacing-unit;
 
     h2 {
